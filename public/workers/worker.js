@@ -1,5 +1,12 @@
+
 class ColorAverage {
 
+    /**
+     * @param { TileImageData } imageData
+     * @return { Object }
+     * Will calculate the average RGB color within a single tile by
+     * analysing its image data and returning the result within an object.
+     */
     static getAverageRGB(imageData) {
             const blockSize = 5; // only visit every 5 pixels
             const rgb = { r:0, g:0, b:0 };
@@ -20,42 +27,36 @@ class ColorAverage {
         return rgb;
     }
 
+    /**
+     * @param { number } r 
+     * @param { number } g 
+     * @param { number } b 
+     * Reveives numerical values for red green and blue colours and converts
+     * them into a hexedecimal code.
+     */
     static rgbToHex(r, g, b) {
         return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 
-    static rgbToBuffer(r, g, b) {
-        const rHex = ColorAverage.intToHex(r);
-        const gHex = ColorAverage.intToHex(g);
-        const bHex = ColorAverage.intToHex(b);
-
-        return new Uint8Array([ rHex, gHex, bHex ]).buffer;
-    }
-
-    static buf2hex(buffer) { // buffer is an ArrayBuffer
-        return [...new Uint8Array(buffer)]
-            .map(x => x.toString(16).padStart(2, '0'))
-            .join('');
-      }
-
-    static intToHex(integer) {
-        let number = (+integer).toString(16).toUpperCase()
-        if( (number.length % 2) > 0 ) { number= "0" + number }
-        return number
-  }
-
+    /**
+     * @param { TileImageData } imageData 
+     * Converts a tiles image data into a hexedecimal by calling other functions
+     * within this class
+     */
     static getHexFromImageData(imageData) {
         const color = ColorAverage.getAverageRGB(imageData);
         const averageHex = ColorAverage.rgbToHex(color.r, color.g, color.b)
         return averageHex;
     }
 
-    static getBufferFromImageData(imageData) {
-        const color = ColorAverage.getAverageRGB(imageData);
-        const buffer = (this.rgbToBuffer(color.r, color.g, color.b))
-        return buffer;
-    }
-
+    /**
+     * @param { TileImageData[][] } chunk
+     * Receives a chunk in the format of an array. Within the array is a child 
+     * array containing image data for a tile. Each child array represents a row.
+     * This function deconstructs the chunk, calculates the average colour within
+     * each tile, passes through the x and y coordinates of the tile, packages the
+     * new data into a chunk, and returns the new chunk.
+     */
     static getColorChunkFromImageDataChunk(chunk) {
         const colorChunk = []
         for (let row = 0; row < chunk.length; row++) {
@@ -74,30 +75,17 @@ class ColorAverage {
         }
         return colorChunk;
     }
-
-    static getBufferChunkFromImageDataChunk(chunk) {
-        const bufferChunk = []
-        for (let row = 0; row < chunk.length; row++) {
-            const bufferRow = []
-            for (let tile = 0; tile < chunk[row].length; tile++) {
-                const buffer = ColorAverage.getBufferFromImageData(chunk[row][tile]);
-                bufferRow.push(buffer);
-            }
-            bufferChunk.push(bufferRow)
-        }
-        return bufferChunk;
-
-    }
-
 }
 
-
+/**
+ * @Worker
+ * Receives a chunk of tile image data, passes it to a function which converts
+ * it into a chunk of average color data, and then posts the new chunk back to
+ * the main application.
+ */
 this.onmessage = function(e) {
-    // this.postMessage({ color });
     const { chunk } = e.data;
     const colorChunk = ColorAverage.getColorChunkFromImageDataChunk(chunk)
-    // const bufferChunk = ColorAverage.getBufferChunkFromImageDataChunk(chunk)
 
     this.postMessage({ colorChunk })
-    // this.postMessage({ bufferChunk },  [ bufferChunk ])
 }

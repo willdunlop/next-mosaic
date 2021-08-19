@@ -19,15 +19,26 @@ const buttonClasses = [
     "outline-none",
     "transition",
     "transform",
+    "hover:-translate-y-1",
     "active:shadow-none",
     "active:translate-y-1"
 ].join(" ");
 
-
+/**
+ * @Component
+ * @param { MosaicProps } props 
+ * Renders both the uploaded image and mosaic. Also renders a button which will trigger
+ * the generation of the mosaic.
+ */
 export default function Mosaic(props:MosaicProps) {
     const canvasRef = React.createRef<HTMLCanvasElement>();
     const { initiate } = useMosaic(canvasRef);
 
+    /**
+     * Event handler for when the user initiates the mosaic. 
+     * Calls the 'initiate' function which resides within the
+     * 'useMosaic' hook. 
+     */
     const generateMosaic = () => {
         initiate(props.imageElement);
     }

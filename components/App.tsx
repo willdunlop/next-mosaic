@@ -4,7 +4,7 @@ import Mosaic from "./Mosaic";
 import { MAX_IMAGE_WIDTH } from "../config/constants";
 
 export default function App() {
-    // @TODO: Organise your drage handlers, its a nice touch but is it worth it?
+    // @TODO: Organise your drag handlers, its a nice touch but is it worth it?
     const [dragIsActive, setDragIsActive] = React.useState(false)
     const [imageElement, setImageElement] = React.useState<HTMLImageElement>();
     const [fileError, setFileError] = React.useState("")
@@ -42,7 +42,6 @@ export default function App() {
         resizeCanvas.height = newImageElement.height
         const resizeContext = resizeCanvas.getContext("2d");
         if(resizeContext) {
-            console.log("context detected")
             resizeContext.drawImage(newImageElement, 0, 0, newImageElement.width, newImageElement.height);
             scaledImageElement.src = resizeCanvas.toDataURL();
             return scaledImageElement;

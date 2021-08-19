@@ -8,19 +8,39 @@ interface ImageDropUploaderProps {
 
 }
 
+/**
+ * @Component
+ * @param { ImageDropUploaderProps } props 
+ * Renders the blue file drop zone and handles some basic file validation that
+ * is triggered on upload
+ */
 export default function ImageDropUploader(props:ImageDropUploaderProps) {
 
-    const dragOver = (event:React.DragEvent<HTMLDivElement>) => {
+    /**
+     * @param { React.DragEvent<HTMLDivElement> } event 
+     * Prevents the browser from opening the image when the user drops it from their drag
+     */
+    const onDragEvent = (event:React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
     }
 
+    /**
+     * @param { File } file 
+     * @returns { boolean }
+     * Compares the file type against a list of accepted formats
+     */
     const fileIsAnImage = (file:File) => {
         if (VALID_FILE_TYPES.indexOf(file.type) === -1) {
             return false;
         }
         return true;
     }
+
+    /**
+     * @param { File } file 
+     * Checks if the file size is below certain threshold
+     */
     const fileWithinSizeLimit = (file:File) => {
         if (file.size < MAX_FILE_SIZE) {
             return true
@@ -28,6 +48,13 @@ export default function ImageDropUploader(props:ImageDropUploaderProps) {
         return false;
     }
 
+    /**
+     * @param { React.DragEvent<HTMLDivElement> } event 
+     * Event handler for when a file is provided by the user.
+     * It will run a series of validation checks and process the file if all of them pass.
+     * Loading of the file is handed by an elevated function "loadImage" which has been passed 
+     * through as a prop
+     */
     const fileDrop = (event:React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         event.stopPropagation();
@@ -43,7 +70,6 @@ export default function ImageDropUploader(props:ImageDropUploaderProps) {
                 props.setFileError(FileError.TO_LARGE);
                 return
             }
-            console.log("file", file)
             const reader = new FileReader();
             reader.onload = props.loadImage
             reader.readAsDataURL(file);
@@ -58,9 +84,9 @@ export default function ImageDropUploader(props:ImageDropUploaderProps) {
             <div
                 id="dropUploader"
                 className="pt-6 pb-6 pr-12 pl-12 w-full bg-blue-100 border-4 border-blue-300 rounded-md flex flex-col justify-center items-center"
-                onDragOver={dragOver}
-                onDragEnter={dragOver}
-                onDragLeave={dragOver}
+                onDragOver={onDragEvent}
+                onDragEnter={onDragEvent}
+                onDragLeave={onDragEvent}
                 onDrop={fileDrop}
             >
                 <p>Drop an image here to begin!</p>

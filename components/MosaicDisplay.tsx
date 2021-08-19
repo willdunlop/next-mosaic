@@ -1,5 +1,9 @@
 import * as React from "react";
 
+/**
+ * @Component
+ * A container component for the mosaic canvas. A ref has been forwarded for elevated interaction.
+ */
 const MosaicDisplay = React.forwardRef((props:any, ref:React.ForwardedRef<HTMLCanvasElement>) => {
     return (
         <div className=" w-full border-4 border-green-300 p-2">

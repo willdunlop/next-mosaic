@@ -5,8 +5,12 @@ interface ImagePreviewProps {
     imageElement: HTMLImageElement;
 }
 
+/**
+ * @Component
+ * @param { ImagePreviewProps } props 
+ * A container for the uploaded image to be previewed within 
+ */
 export default function ImagePreview(props: ImagePreviewProps) {
-
     return (
         <div className=" w-full border-4 border-red-300 mr-8 p-2">
             {
@@ -16,7 +20,6 @@ export default function ImagePreview(props: ImagePreviewProps) {
                         alt="Image preview"
                         width={props.imageElement.width}
                         height={props.imageElement.height}
-                        layout="intrinsic"
                     />
             }
         </div>
