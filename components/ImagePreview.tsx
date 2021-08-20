@@ -12,11 +12,12 @@ interface ImagePreviewProps {
  */
 export default function ImagePreview(props: ImagePreviewProps) {
     return (
-        <div className=" w-full border-4 border-red-300 mr-8 p-2 flex align-items justify-content">
+        <div className=" w-full border-4 border-red-300 p-2 flex align-items justify-content 2xl:mr-8">
             {
                 props.imageElement &&
                     <Image
                         src={props.imageElement.src}
+                        className="mr-auto ml-auto"
                         alt="Image preview"
                         width={props.imageElement.width}
                         height={props.imageElement.height}
