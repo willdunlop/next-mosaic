@@ -12,8 +12,8 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @async @function
      * @param { HTMLImageElement } imageElement
      * The function that is run when the user begins the process of generating a mosaic.
-     * Creates a tile sized canvas that is used to scan the image and collect image data.
-     * Once image data is collected, workers are dispatched and collect the color average
+     * Creates a tile sized canvas that is used to scan the image and collect ImageData.
+     * Once ImageData is collected, workers are dispatched and collect the color average
      * for each tile. The color averages are then used to construct the mosaic.
      */
     async function initiate(imageElement:HTMLImageElement) {
@@ -39,7 +39,7 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @param { CanvasRenderingContext2D }  tileContext 
      * @return { TileImageData[][] }
      * Calculates the number of rows and columns that will be required and scans the provided
-     * image to collect image data for each tile. Each row is preserved within its own array 
+     * image to collect ImageData for each tile. Each row is preserved within its own array 
      * and all of the row arrays are packaged into a parent array which is returned
      */
     function scanImageForImageData(imageElement:HTMLImageElement, tileContext:CanvasRenderingContext2D) {
@@ -47,7 +47,7 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
         const columnCount = Math.ceil(imageElement.width / TILE_WIDTH);
         const allTileRows:TileImageData[][] = []       
         const scanStart = performance.now();
-
+        // Using efficient for loops for the sake of performance
         for (let row = 0; row < rowCount; row++) {
             const tileRow:TileImageData[] = [];
 
@@ -59,7 +59,7 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
                 const tile = {
                     data: tileImageData,
                     x: positionX,
-                    y:positionY
+                    y: positionY
                 }
                 tileRow.push(tile);
             }
@@ -78,8 +78,8 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @async @function
      * @param { TileImageData[][] } allTileRows 
      * @return { Promise<ColorData[][]> }
-     * Divides the collected image data into a number of chunks depending on how many logical cores the user's
-     * computer has. Each chunk is then distributed to a worker which will convert the chunk of image data into
+     * Divides the collected ImageData into a number of chunks depending on how many logical cores the user's
+     * computer has. Each chunk is then distributed to a worker which will convert the chunk of ImageData into
      * a chunk of averaged colors. The chunks are then merged back into a full array and returned
      */
     async function dispatchWorkersWithChunks(allTileRows:TileImageData[][]) {
@@ -93,7 +93,7 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
         const workersEnd = performance.now()
         const workerPerformance = workersEnd - workersStart;
         console.info(`Workers completed tasks in ${workerPerformance} ms`);
-        const allColorRows = colorChunks.flat(1);
+        const allColorRows = colorChunks.flat();
 
         return allColorRows
     }
@@ -102,11 +102,11 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @async
      * @function
      * @param { Promise<TileImageData[][]> } chunk 
-     * Will dispatch workers with a provided image data chunk and resolve with a color data chunk.
+     * Will dispatch workers with a provided ImageData chunk and resolve with a ColorData chunk.
      */
     async function dispatchColourAverageWorker(chunk:TileImageData[][]) {
         return new Promise<ColorData[][]>((resolve, reject) => {
-            const worker = new Worker("/workers/worker.js");
+            const worker = new Worker("/workers/ColorAverage.js");
             worker.postMessage({ chunk });
             worker.onmessage = (e) => {
                 worker.terminate();
@@ -119,7 +119,8 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @async @function
      * @param { ColorData[][] } rows
      * Fetches the svg tiles from the backend and prepares an entire row. The row is then passed off
-     * to a function that renders the results. This performed for each row until it is completed
+     * to a function that renders the results. This is performed for each row until the mosaic is fully
+     * rendered
      */
     async function constructMosaic(rows:ColorData[][]) {
         console.info("Rendering mosaic...");
@@ -135,27 +136,45 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
 
     /**
      * @async @function
-     * @param {Number} rowIndex
+     * @param { Number } rowIndex
+     * @param { ColorData[][] } rows
      * @return { Promise<TileURLData[]> }
-     * Loops through all the collected colors in a row. With each tile, a call is made to the server 
-     * to fetch a mosaic tile. The tiles are storred in an array that represents one row which is then returned
+     * Loops through all the collected ColorData in a row. A promise is created for each tile and stored
+     * in an array. The array is then passed to Promis.all which will execute each promise in parralel
+     * and resolve once all are completed.
      */
     async function getRowOfSVG(rowIndex:number, rows:ColorData[][]) {
-        const rowData = [];
+        const rowPromises = []
         for (let tile = 0; tile < rows[rowIndex].length; tile++) {
-            const colorData = rows[rowIndex][tile];        
-            const response = await fetch(`${API_URL}${API_TILE_ENDPOINT}${colorData.hex}`);
+            const tileColorData = rows[rowIndex][tile];
+            const tilePromise = getSingleTileOfSVG(tileColorData)
+            rowPromises.push(tilePromise)
+        };
+        const rowData = await Promise.all(rowPromises);
+        return rowData;
+    }
+
+    /**
+     * @function
+     * @param { ColorData } tileColorData 
+     * @return { Promise<TileURLData> }
+     * Creates and returns a promise which fetches the svg tile from the server, formats the response into
+     * a Blob, creates a URL for the blob, and resolves with a TileURLData object containing the blob url and 
+     * coordinates.
+     */
+    function getSingleTileOfSVG(tileColorData:ColorData) {
+        return new Promise<TileURLData>(async (resolve, reject) => {
+            const response = await fetch(`${API_URL}${API_TILE_ENDPOINT}${tileColorData.hex}`);
             const svgString = await response.text();
             const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
             const svgURL = window.URL.createObjectURL(svgBlob);
             const data:TileURLData = {
                 url: svgURL,
-                x: colorData.x,
-                y: colorData.y
+                x: tileColorData.x,
+                y: tileColorData.y
             }
-            rowData.push(data);
-        };
-        return rowData;
+            resolve(data);
+        })
     }
 
     /**

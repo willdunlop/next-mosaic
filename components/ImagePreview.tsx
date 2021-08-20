@@ -8,7 +8,7 @@ interface ImagePreviewProps {
 /**
  * @Component
  * @param { ImagePreviewProps } props 
- * A container for the uploaded image to be previewed within 
+ * A container for the uploaded image to be displayed from
  */
 export default function ImagePreview(props: ImagePreviewProps) {
     return (

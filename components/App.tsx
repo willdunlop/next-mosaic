@@ -3,69 +3,82 @@ import ImageDropUploader from "./ImageDropUploader";
 import Mosaic from "./Mosaic";
 import { MAX_IMAGE_WIDTH } from "../config/constants";
 
+/**
+ * @Component
+ * The main component of the application
+ */
 export default function App() {
-    // @TODO: Organise your drag handlers, its a nice touch but is it worth it?
     const [dragIsActive, setDragIsActive] = React.useState(false)
     const [imageElement, setImageElement] = React.useState<HTMLImageElement>();
     const [fileError, setFileError] = React.useState("")
 
-    const onDragEnter = (event:React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (!dragIsActive) {
-            // setDragIsActive(true)
+    /**
+     * @param { ProgressEvent<FileReader> } event 
+     * A function that fires when a validated image is processed. The image is created using
+     * the Image constructor and is sent off to have its dimensions analysed and rescaled if
+     * necessary
+     */
+    const loadImage = (event:ProgressEvent<FileReader>) => {
+        const newImageElement = new Image();
+        newImageElement.onload = () => {
+            const scaledImageElement = scaleImage(newImageElement);
+            console.info("Image detected");
+            setImageElement(scaledImageElement);
+        }
+        if (event && event.target) {
+            if (typeof event.target.result === "string") {
+                newImageElement.src = event.target.result
+            }
         }
     }
 
-    const onDragEnd = (event:React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        console.log("drag end")
-        if (dragIsActive) {
-            // setDragIsActive(false)
-        }
-    }
-
+    /**
+     * @param { HTMLImageElement } newImageElement 
+     * @return { HTMLImageElement | void }
+     * Checks the width of the provided image and uses a HTML5 canvas to rescale it if it
+     * exceeds the maximum accepted width.
+     */
     const scaleImage = (newImageElement:HTMLImageElement) => {
+        // Return the original image if it is within the acceptable boundaries 
         if (newImageElement.width < MAX_IMAGE_WIDTH) return newImageElement;
 
 		if (newImageElement.width > MAX_IMAGE_WIDTH) {
 			newImageElement.height *= MAX_IMAGE_WIDTH / newImageElement.width;
 			newImageElement.width = MAX_IMAGE_WIDTH;
         }
-
+        // Create a new image element to copy the canvas output too
         const scaledImageElement = new Image();
         scaledImageElement.width = newImageElement.width;
-        scaledImageElement.height = newImageElement.height
-        const resizeCanvas = document.createElement("canvas");
-        resizeCanvas.width = newImageElement.width;
-        resizeCanvas.height = newImageElement.height
-        const resizeContext = resizeCanvas.getContext("2d");
-        if(resizeContext) {
-            resizeContext.drawImage(newImageElement, 0, 0, newImageElement.width, newImageElement.height);
-            scaledImageElement.src = resizeCanvas.toDataURL();
+        scaledImageElement.height = newImageElement.height;
+        // Use a canvas to scale the image
+        const scalingCanvas = document.createElement("canvas");
+        scalingCanvas.width = newImageElement.width;
+        scalingCanvas.height = newImageElement.height
+        const scalingContext = scalingCanvas.getContext("2d");
+        if(scalingContext) {
+            scalingContext.drawImage(newImageElement, 0, 0, newImageElement.width, newImageElement.height);
+            scaledImageElement.src = scalingCanvas.toDataURL();            
             return scaledImageElement;
         }
-
     }
 
-    const loadImage = (event:ProgressEvent<FileReader>) => {
-        const newImageElement = new Image();
-        newImageElement.onload = (e) => {
-            const scaledImageElement = scaleImage(newImageElement);
-            setImageElement(scaledImageElement);
-        }
-        if (event && event.target) {
-            newImageElement.src = event.target.result as string;
+    /**
+     * @param { React.DragEvent<HTMLDivElement> } event
+     * Triggers the dragIsActive state that is used to scale up the dropzone, prompting 
+     * the user to drop their image within it.
+     */
+    const onDragEnter = (event:React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!dragIsActive) {
+            setDragIsActive(true)
         }
     }
-
 
     return (
         <div
             className="flex flex-col items-center h-screen mt-8"
             onDragEnter={onDragEnter}
-            onDragEnd={onDragEnd}
         >
             <h1>Next.js Mosaic</h1>
             <div className="h-8">
@@ -74,6 +87,7 @@ export default function App() {
 
             <ImageDropUploader
                 dragIsActive={dragIsActive}
+                setDragIsActive={setDragIsActive}
                 setFileError={setFileError}
                 loadImage={loadImage}
             />
