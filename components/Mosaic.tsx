@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import ImagePreview from "./ImagePreview";
 import MosaicDisplay from "./MosaicDisplay";
 import useMosaic from "../hooks/useMosaic";
@@ -28,7 +27,7 @@ const buttonClasses = [
  * @Component
  * @param { MosaicProps } props 
  * Renders both the uploaded image and mosaic. Also renders a button which will trigger
- * the generation of the mosaic.
+ * the mosaic generation process.
  */
 export default function Mosaic(props:MosaicProps) {
     const canvasRef = React.createRef<HTMLCanvasElement>();
@@ -46,7 +45,7 @@ export default function Mosaic(props:MosaicProps) {
     return (
         <div className="flex flex-col items-center mt-8 max-w-screen-2xl">
             <button className={buttonClasses} onClick={generateMosaic}>Generate Mosaic</button>
-            <div className="flex mt-4">
+            <div className="flex mt-8">
                 <ImagePreview imageElement={props.imageElement} />
                 <MosaicDisplay ref={canvasRef} imageElement={props.imageElement}/>
             </div>

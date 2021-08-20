@@ -3,6 +3,17 @@ import ImageDropUploader from "./ImageDropUploader";
 import Mosaic from "./Mosaic";
 import { MAX_IMAGE_WIDTH } from "../config/constants";
 
+const titleClasses = [
+    "text-5xl",
+    "font-bold",
+    "bg-gradient-to-r",
+    "from-green-400",
+    "to-blue-500",
+    "bg-clip-text",
+    "text-transparent",
+    "p-2"
+].join(" ");
+
 /**
  * @Component
  * The main component of the application
@@ -80,7 +91,7 @@ export default function App() {
             className="flex flex-col items-center h-screen mt-8"
             onDragEnter={onDragEnter}
         >
-            <h1>Next.js Mosaic</h1>
+            <h1 className={titleClasses}>Next.js Mosaic</h1>
             <div className="h-8">
                 <p className={`text-red-400 ${!fileError && "hidden"}`}>{fileError}</p>
             </div>

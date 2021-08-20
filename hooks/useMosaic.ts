@@ -140,7 +140,7 @@ export default function useMosaic(canvasRef: React.RefObject<HTMLCanvasElement>)
      * @param { ColorData[][] } rows
      * @return { Promise<TileURLData[]> }
      * Loops through all the collected ColorData in a row. A promise is created for each tile and stored
-     * in an array. The array is then passed to Promis.all which will execute each promise in parralel
+     * in an array. The array is then passed to Promise.all which will execute each promise in parralel
      * and resolve once all are completed.
      */
     async function getRowOfSVG(rowIndex:number, rows:ColorData[][]) {

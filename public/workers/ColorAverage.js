@@ -5,7 +5,7 @@ class ColorAverage {
      * @param { TileImageData } imageData
      * @return { Object }
      * Will calculate the average RGB color within a single tile by
-     * analysing its image data and returning the result within an object.
+     * analysing its ImageData and returning the result within an object.
      */
     static getAverageRGB(imageData) {
             const blockSize = 5; // only visit every 5 pixels
@@ -40,7 +40,7 @@ class ColorAverage {
 
     /**
      * @param { TileImageData } imageData 
-     * Converts a tiles image data into a hexedecimal by calling other functions
+     * Converts a tiles ImageData into a hexedecimal by calling other functions
      * within this class
      */
     static getHexFromImageData(imageData) {
@@ -52,7 +52,7 @@ class ColorAverage {
     /**
      * @param { TileImageData[][] } chunk
      * Receives a chunk in the format of an array. Within the array is a child 
-     * array containing image data for a tile. Each child array represents a row.
+     * array containing ImageData for a tile. Each child array represents a row.
      * This function deconstructs the chunk, calculates the average colour within
      * each tile, passes through the x and y coordinates of the tile, packages the
      * new data into a chunk, and returns the new chunk.
@@ -79,7 +79,7 @@ class ColorAverage {
 
 /**
  * @Worker
- * Receives a chunk of tile image data, passes it to a function which converts
+ * Receives a chunk of tile ImageData, passes it to a function which converts
  * it into a chunk of average color data, and then posts the new chunk back to
  * the main application.
  */

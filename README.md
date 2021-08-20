@@ -35,6 +35,27 @@ yarn install
 yarn dev
 ```
 
+### Clone the repository
+
+Clone the repository to your local machine using the command `git clone https://github.com/willdunlop/next-mosaic.git`
+
+### Install NPM dependencies
+
+Once you have cloned the repo, move into the project directory with `cd ./next-mosaic`.
+Simply run `npm install` to begin installing the dependencies defined within the `package.json` file.
+
+### Build the project
+
+To build the project, simply run `npm run build` and Nextjs will begin it's build process. This will provide you with a production ready build which can be launched in the next step
+
+### Serve the production build
+
+Running the command `npm start` will serve a production build of the app which can then be visited by going to `http://localhost:3000` in your web browser.
+
+### Develop mode
+
+Run `npm run dev` if you wish to use the project in develop mode. This can also be visited by going to `http://localhost:3000` in your web browser.
+
 ## Skeleton
 
 The project skeleton contains the following:
