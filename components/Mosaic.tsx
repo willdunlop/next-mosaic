@@ -45,7 +45,7 @@ export default function Mosaic(props:MosaicProps) {
     return (
         <div className="flex flex-col items-center mt-8 max-w-screen-2xl">
             <button className={buttonClasses} onClick={generateMosaic}>Generate Mosaic</button>
-            <div className="flex mt-8">
+            <div className="flex flex-col mt-8 2xl:flex-row">
                 <ImagePreview imageElement={props.imageElement} />
                 <MosaicDisplay ref={canvasRef} imageElement={props.imageElement}/>
             </div>
