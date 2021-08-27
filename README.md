@@ -46,8 +46,10 @@ Simply run `npm install` to begin installing the dependencies defined within the
 
 ### Build the project
 
-To build the project, simply run `npm run build` and Nextjs will begin it's build process. This will provide you with a production ready build which can be launched in the next step
+To build the project, simply run `npm run build` and Nextjs will begin it's build process. This will provide you with a production ready build which can be launched in the next step.
 
+### Copy the .env file
+In order for environemnet variables to be exposed to the app, a copy of the file `.env.example` must be made. This file can be found in the root of the project and it's copy needs to be renamed to `.env.local`. `env.local` must also reside in the root of the project.
 ### Serve the production build
 
 Running the command `npm start` will serve a production build of the app which can then be visited by going to `http://localhost:3000` in your web browser.
